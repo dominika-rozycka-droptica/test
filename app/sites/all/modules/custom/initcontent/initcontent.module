@@ -1,0 +1,204 @@
+<?php
+//
+//  /**
+//   * Implements hook_menu()
+//   */
+//  function initcontent_menu() {
+//    $items['initcontent'] = array(
+//      'title' => 'Init content',
+//      'page callback' => 'initcontent_page',
+//      'access arguments' => array('access content')
+//    );
+//
+//    return $items;
+//  }
+//
+//  /**
+//   * Creates some new vocabulary terms
+//   * @param string $category_name
+//   */
+//  function initcontent_add_product_category_terms($category_name = 'product_category') {
+//    $terms_names = array(
+//      'album',
+//      'movie',
+//      'book',
+//    );
+//    $vocabulary = taxonomy_vocabulary_machine_name_load($category_name);
+//
+//    foreach ($terms_names as $term_name){
+//      $term = (object) array(
+//        'name' => $term_name,
+//        'vid' => $vocabulary->vid
+//      );
+//      taxonomy_term_save($term);
+//      drupal_set_message(t("Term $term_name has been added"));
+//    }
+//  }
+//
+//  /**
+//   * Checks if vocabulary already exists
+//   *
+//   * @param $vocabulary_machine_name
+//   *
+//   * @return bool
+//   */
+//  function initcontent_vocabulary_already_exists($vocabulary_machine_name) {
+//    $vocabulary = taxonomy_vocabulary_machine_name_load
+//    ($vocabulary_machine_name);
+//
+//    if (!empty($vocabulary)) {
+//      return TRUE;
+//    }
+//    else {
+//      return FALSE;
+//    }
+//  }
+//
+//  /**
+//   * Creates vocabulary: 'product_category'
+//   *
+//   * @param $vocabulary_machine_name
+//   */
+//  function initcontent_add_product_category_vocabulary
+//  ($vocabulary_machine_name) {
+//
+//    if (!initcontent_vocabulary_already_exists($vocabulary_machine_name)) {
+//      $new_vocabulary = (object) array(
+//        'name' => 'Product category',
+//        'machine_name' => $vocabulary_machine_name,
+//      );
+//      taxonomy_vocabulary_save($new_vocabulary);
+//      drupal_set_message(t("Vocabulary $vocabulary_machine_name has been created."));
+//    }
+//
+//    /* Add some new terms to the vocabulary */
+//    initcontent_add_product_category_terms();
+//  }
+//
+//
+//  /**
+//   * Checks if field already exists
+//   *
+//   * @param $field_name
+//   *
+//   * @return bool
+//   */
+//  function initcontent_field_already_exists($field_name) {
+//    $field = field_info_field($field_name);
+//
+//    if( !empty($field) ) {
+//      return TRUE;
+//    }
+//    else {
+//      return FALSE;
+//    }
+//  }
+//
+//  /**
+//   * Checks if field instance already exists
+//   *
+//   * @param $field_name
+//   *
+//   * @return bool
+//   */
+//  function initcontent_field_instance_already_exists($field_name,
+//                                                     $content_type_name) {
+//
+//    $field_instance = field_info_instance('node', $field_name,
+//      $content_type_name);
+//
+//    if( !empty($field_instance) ) {
+//      return TRUE;
+//    }
+//    else {
+//      return FALSE;
+//    }
+//  }
+//
+//  /**
+//   * Create new fields to 'product' content type
+//   */
+//  function initcontent_add_product_content_type_fields($content_type_name) {
+//    $fields = array(
+//      'count' => array(
+//        'field_name' => 'count',
+//        'type' => 'text',
+//        'cardinality' => 1
+//      ),
+//      'product_category' => array(
+//        'field_name' => 'product_category',
+//        'type' => 'taxonomy_term_reference',
+//        'settings' => array(
+//          'allowed_values' => array(
+//            array(
+//              'vocabulary' => 'product_category',
+//              'parent' => 0
+//            ),
+//          ),
+//        ),
+//      ),
+//    );
+//
+//    foreach( $fields as $field_name => $field ) {
+//
+//      if( !initcontent_field_already_exists($field_name) ) {
+//        field_create_field($field);
+//      }
+//    }
+//
+//    $instances = array(
+//      'count' => array(
+//        'field_name' => 'count',
+//        'label' => 'Count',
+//        'required' => TRUE,
+//        'widget' => array(
+//          'type' => 'text_textfield'
+//        ),
+//      ),
+//      'product_category' => array(
+//        'field_name' => 'product_category',
+//        'label' => 'Product category',
+//        'required' => TRUE,
+//        'widget' => array(
+//          'type' => 'options_select'
+//        ),
+//      ),
+//    );
+//
+//    foreach($instances as $field_name => $instance) {
+//      if( !initcontent_field_instance_already_exists($field_name,
+//        $content_type_name)) {
+//        $instance['entity_type'] = 'node';
+//        $instance['bundle'] = $content_type_name;
+//        field_create_instance($instance);
+//      }
+//    }
+//  }
+//
+//  /**
+//   * Create new content type
+//   */
+//  function initcontent_add_product_content_type($content_type_name){
+//    $content_type = array(
+//      'type' => $content_type_name,
+//      'name' => 'Product',
+//      'title_label' => 'Product name',
+//      'base' => 'node_content',
+//      'custom' => 1
+//    );
+//
+//    $node_type = node_type_set_defaults($content_type);
+//
+//    node_type_save($node_type);
+//    node_add_body_field($node_type);
+//
+//    initcontent_add_product_content_type_fields($content_type_name);
+//  }
+//
+//  /**
+//   * page_callback
+//   */
+//  function initcontent_page() {
+//    initcontent_add_product_category_vocabulary('product_category');
+//    initcontent_add_product_content_type('product');
+//  }

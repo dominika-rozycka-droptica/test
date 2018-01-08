@@ -1,0 +1,49 @@
+<?php
+
+//  function application_schema() {
+//    $schema['application_table'] = array(
+//      'description' => 'Test table',
+//      'fields' => array(
+//        'test' => array(
+//          'description' => 'test field',
+//          'type' => 'int',
+//          'not null' => TRUE,
+//        ),
+//      ),
+//    );
+//    return $schema;
+//  }
+
+  /**
+   * A hook that enables and disables some modules
+   */
+  function application_update_7001() {
+    $modules_to_enable = array(
+      'admin_menu',
+      'admin_menu_toolbar',
+      'features',
+      'ctools',
+      'views',
+      'views_ui',
+      'token',
+      'pathauto',
+      'entity',
+      'entityreference',
+    );
+    module_enable($modules_to_enable);
+
+
+    $modules_to_disable = array(
+      'toolbar',
+      'overlay',
+    );
+    module_disable($modules_to_disable);
+    drupal_uninstall_modules($modules_to_disable);
+  }
+
+  /**
+   * A hook that enables 'initcontent' module
+   */
+  function application_update_7002() {
+    module_enable(array('initcontent'));
+  }

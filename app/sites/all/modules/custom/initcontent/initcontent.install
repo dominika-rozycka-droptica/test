@@ -1,0 +1,130 @@
+<?php
+
+  /**
+   * Creates some new vocabulary terms
+   * @param string $category_name
+   */
+  function initcontent_add_product_category_terms($category_name = 'product_category') {
+    $terms_names = array(
+      'album',
+      'movie',
+      'book',
+    );
+    $vocabulary = taxonomy_vocabulary_machine_name_load($category_name);
+
+    foreach ($terms_names as $term_name){
+      $term = (object) array(
+        'name' => $term_name,
+        'vid' => $vocabulary->vid
+      );
+      taxonomy_term_save($term);
+      drupal_set_message(t("Term $term_name has been added"));
+    }
+  }
+
+  /**
+   * @return mixed
+   */
+  function initcontent_get_random_text() {
+    $paragraphs = array();
+    $paragraphs_indexes = NULL;
+    $randomized_paragraph_index = NULL;
+    $randomized_paragraph = NULL;
+
+    /* Texts */
+    $paragraphs[] = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris leo urna, ornare eu laoreet in, placerat quis dolor. Cras dapibus libero purus, ac vehicula metus luctus nec. Aliquam erat volutpat. In suscipit enim ut convallis hendrerit. Integer semper tellus non malesuada rutrum. Donec pulvinar erat velit, vel sodales enim egestas et. Nam mollis laoreet auctor. Proin tincidunt, dui at pretium suscipit, est nunc mollis ipsum, ut porta odio orci nec lectus. Pellentesque gravida diam sit amet nisi aliquam tincidunt. Praesent tincidunt aliquet sem sed scelerisque. ';
+    $paragraphs[] = 'Quisque accumsan ac diam at dictum. Donec laoreet id sem sed scelerisque. Proin quis tincidunt ipsum. In blandit tortor quis mauris pellentesque aliquet. Curabitur bibendum quis risus congue lobortis. Cras ut odio lacus. Praesent tellus mi, interdum non lacus at, tincidunt tincidunt risus. ';
+    $paragraphs[] = 'Aenean quis eros non dui rhoncus mattis ac ut enim. Ut tincidunt aliquet elit ut dignissim. Integer quis velit quis libero consectetur consectetur. Pellentesque ut dolor ac leo mollis commodo vitae in felis. Duis hendrerit, urna sit amet faucibus suscipit, lorem nulla vulputate ante, ac sodales nulla nulla in diam. Suspendisse orci tortor, bibendum ac lacinia a, tincidunt a eros. Cras porta nunc lectus, eu elementum sem tempor sit amet. Donec vitae augue condimentum, rutrum purus aliquet, volutpat nisi. ';
+    $paragraphs[] = 'Nam rutrum augue eget metus sagittis, feugiat interdum lacus dignissim. Donec egestas, justo a aliquet sagittis, arcu tellus viverra elit, id vestibulum metus ligula at sapien. Duis sed mollis massa. Aliquam faucibus libero quis lacus finibus consequat. Phasellus varius ex et arcu maximus porttitor. Nullam vitae vestibulum velit, ac feugiat erat. Praesent eu neque condimentum, iaculis ipsum sit amet, pulvinar lectus. ';
+
+    /* Randomize paragraph index */
+    $paragraphs_indexes = array_keys($paragraphs);
+    $randomized_paragraph_index = array_rand($paragraphs_indexes);
+    $randomized_paragraph = $paragraphs[$randomized_paragraph_index];
+
+    return $randomized_paragraph;
+  }
+
+
+  /**
+   * @return int
+   */
+  function initcontent_get_random_number() {
+    return rand(1, 100);
+  }
+
+
+  /**
+   * @param $vocabulary_name
+   *
+   * @return mixed
+   */
+  function initcontent_get_random_tid($vocabulary_name) {
+    $vocabulary = taxonomy_vocabulary_machine_name_load($vocabulary_name);
+    $terms = taxonomy_get_tree($vocabulary->vid);
+
+    $randomized_term_index = array_rand($terms);
+    $randomized_term = $terms[$randomized_term_index];
+
+    return $randomized_term->tid;
+  }
+
+
+  /**
+   * @return array
+   */
+  function initcontent_generate_random_fields() {
+    $randomized_fields = array(
+      'title' => t('Product id') . ': ' . initcontent_get_random_number(),
+      'body' => '<p>' . initcontent_get_random_text() . '</p>',
+      'count' => initcontent_get_random_number(),
+      'product_category' => initcontent_get_random_tid('product_category'),
+    );
+
+    return $randomized_fields;
+  }
+
+  /**
+   * @return \stdClass
+   */
+  function initcontent_generate_empty_node() {
+    $node = new stdClass();
+    $node->type = 'product';
+    $node->language = 'en';
+    $node->status = 1;
+
+    return $node;
+  }
+
+
+  /**
+   * Creates node
+   */
+  function initcontent_create_node_with_randomized_fields() {
+    $fields = initcontent_generate_random_fields();
+    $node = initcontent_generate_empty_node();
+
+    $node->title = $fields['title'];
+    $node->body[LANGUAGE_NONE][0]['value'] = $fields['body'];
+    $node->body[LANGUAGE_NONE][0]['format'] = 'full_html';
+    $node->count[LANGUAGE_NONE][0]['value'] = $fields['count'];
+    $node->product_category[LANGUAGE_NONE][0]['tid'] =
+      $fields['product_category'];
+    node_save($node);
+  }
+
+  /**
+   * Implements hook_install()
+   */
+  function initcontent_install() {
+    module_enable(array('product4'));
+
+    $number_of_products_to_create = 5;
+    initcontent_add_product_category_terms();
+
+    while( $number_of_products_to_create-- ) {
+      initcontent_create_node_with_randomized_fields();
+    }
+
+    drupal_set_message(t('A new product has been created.'));
+  }
